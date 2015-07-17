@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the page_algorithmia feature.
+ */
+
+include_once 'page_algorithmia.features.inc';
