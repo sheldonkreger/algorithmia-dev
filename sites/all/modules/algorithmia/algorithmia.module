@@ -1,0 +1,70 @@
+<?php
+
+/**
+ * Implements hook_block_info().
+ */
+function algorithmia_block_info() {
+  $blocks = array();
+  $blocks['algorithmia_recommender'] = array(
+    'info' => t('Algorithmia Recommender'),
+    'cache' => DRUPAL_CACHE_PER_PAGE,
+    'status' => 0,
+  );
+
+  return $blocks;
+}
+
+function algorithmia_block_view($delta = '') {
+  // This example comes from node.module.
+  if ($delta == 'algorithmia_recommender') {
+    $block['subject'] = 'Recommended Content';
+    $block['content'] = _algorithmia_get_html();
+  }
+  return $block;
+}
+
+function _algorithmia_get_html() {
+  $api_key = variable_get('algorithmia_api_key');
+  return '<div class="algorithmia-recommends"></div>
+    <script src="//algorithmia.com/assets/javascripts/algorithmia-recommends.js"
+    data-apikey="' . $api_key . '" data-uuid="731509d0bcfa45c6b14b5927145d341e"></script>';
+}
+
+/**
+ * Implements hook_menu().
+ */
+function algorithmia_menu() {
+  $items['admin/config/system/algorithmia'] = array(
+    'title' => 'Algorithmia',
+    'description' => 'Configure Algorithmia API integration.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('algorithmia_admin_settings_form'),
+    'access arguments' => array('administer algorithmia'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'algorithmia.admin.inc',
+  );
+
+  return $items;
+}
+
+function algorithmia_file_insert($file) {
+  watchdog('algorithmia', 'file: ' . print_r($file, true));
+  $path = file_create_url($file->uri);
+  watchdog('algorithmia', 'path: ' . $path);
+  $url = 'https://api.algorithmia.com/v1/algo/sfw/NudityDetection/0.1.63';
+  $key = variable_get('algorithmia_api_key');
+  $options = array(
+    'method' => 'POST',
+    'data' => strval($path),
+    'timeout' => 30,
+    'headers' => array(
+      'content-type' => 'application/json',
+      'Authorization' => 'Simple ' . $key,
+    ),
+  );
+  watchdog('algorithmia', 'optoins: ' . print_r($options, true));
+  $response = drupal_http_request($url, $options);
+  //return $response;
+  watchdog('algorithmia', 'responose: ' . print_r($response, true)); 
+}
+
