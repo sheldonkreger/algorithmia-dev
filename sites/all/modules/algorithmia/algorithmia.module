@@ -74,7 +74,7 @@ function algorithmia_file_operations() {
   watchdog('algorithmia', 'hit function');
   $operations = array(
     'nudity' => array(
-      'label' => t('Scan for Nudity'), 
+      'label' => t('Scan for Nudity'),
       'callback' => 'algorithmia_validate_nudity',
     ),
   );
@@ -87,16 +87,12 @@ function algorithmia_file_operations() {
  *
 */
 function algorithmia_validate_nudity($files) {
-  watchdog('algorithmia', 'files: ' . print_r($files, true));
   foreach ($files as $file) {
     $file = file_load($file);
-    watchdog('algorithmia', 'File: ' . print_r($full, true));
     if ($file->type == 'image') {
-      watchdog('algorithmia', 'file: ' . print_r($file, true));
       $path = file_create_url($file->uri);
       $path = strval($path);
       $path = '"'.trim($path,'"').'"';
-      watchdog('algorithmia', 'path: ' . $path);
       $url = 'https://api.algorithmia.com/v1/algo/sfw/NudityDetection/0.1.63';
       $key = variable_get('algorithmia_api_key');
       $options = array(
@@ -108,11 +104,18 @@ function algorithmia_validate_nudity($files) {
           'Authorization' => 'Simple ' . $key,
         ),
       );
-      watchdog('algorithmia', 'options: ' . print_r($options, true));
       $response = drupal_http_request($url, $options);
       //return $response;
-      watchdog('algorithmia', 'responose: ' . print_r($response, true)); 
+      $json = json_decode($response->data);
+      watchdog('algorithmia', 'json result' . print_r($json->result, true));
+      if (strpos($json->result,'Not') !== false) {
+        continue;
+      }
+      else {
+        drupal_set_message(t('File may contain nudity: ' . print_r($path, true)));
+      }
     }
   }
 }
+
 
