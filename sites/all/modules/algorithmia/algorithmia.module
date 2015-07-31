@@ -46,32 +46,11 @@ function algorithmia_menu() {
 
   return $items;
 }
-
-function algorithmia_file_insert($file) {
-  watchdog('algorithmia', 'file: ' . print_r($file, true));
-  $path = file_create_url($file->uri);
-  $path = strval($path);
-  $path = '"'.trim($path,'"').'"';
-  watchdog('algorithmia', 'path: ' . $path);
-  $url = 'https://api.algorithmia.com/v1/algo/sfw/NudityDetection/0.1.63';
-  $key = variable_get('algorithmia_api_key');
-  $options = array(
-    'method' => 'POST',
-    'data' => $path,
-    'timeout' => 30,
-    'headers' => array(
-      'content-type' => 'application/json',
-      'Authorization' => 'Simple ' . $key,
-    ),
-  );
-  watchdog('algorithmia', 'options: ' . print_r($options, true));
-  $response = drupal_http_request($url, $options);
-  //return $response;
-  watchdog('algorithmia', 'responose: ' . print_r($response, true)); 
-}
-
+/**
+ * Implements hook_file_operations().
+ * Display as a checkbox item in the admin view of files.
+*/
 function algorithmia_file_operations() {
-  watchdog('algorithmia', 'hit function');
   $operations = array(
     'nudity' => array(
       'label' => t('Scan for Nudity'),
@@ -104,18 +83,24 @@ function algorithmia_validate_nudity($files) {
           'Authorization' => 'Simple ' . $key,
         ),
       );
-      $response = drupal_http_request($url, $options);
-      //return $response;
-      $json = json_decode($response->data);
-      watchdog('algorithmia', 'json result' . print_r($json->result, true));
-      if (strpos($json->result,'Not') !== false) {
-        continue;
-      }
-      else {
-        drupal_set_message(t('File may contain nudity: ' . print_r($path, true)));
+      if($response = drupal_http_request($url, $options)) {
+        //return $response;
+        $json = json_decode($response->data);
+
+        if (property_exists($json, 'error')) {
+          watchdog('algorithmia', 'Return error from Algorithmia. JSON: ' . print_r($json, true));
+          drupal_set_message(t( 'Error in Algorithmia API. Link to image may be invalid.'));
+          continue;
+        }
+
+        // Return value will contain 'Not' if the image is not a nude.
+        if (strpos($json->result,'Not') !== false) {
+          continue;
+        }
+        else {
+          drupal_set_message(t('File may contain nudity: ' . print_r($path, true)), 'warning');                                                                }
       }
     }
   }
 }
-
 
