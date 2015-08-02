@@ -18,6 +18,22 @@ function algorithmia_admin_settings_form($form_state) {
     '#required' => TRUE,
     '#description' => t('Insert your Algorithmia API key. You may find this in your account settings on Algorithmia. If you do not have an account, sign up at algorithmia.com.'),
   );
+
+  $form['algorithms'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Enable Algorithms'),
+  );
+
+  //Check existing value, enabled/disabled, true/false.
+  $nudity_enabled = variable_get('algorithmia_nudity');
+  $form['algorithms']['nudity'] = array(
+    '#title' => t('Nudity Detection'),
+    '#default_value' => $nudity_enabled,
+    '#return_value' => 1,
+    '#type' => 'checkbox',
+    '#description' => t('This algorithm detects nudity in pictures. This will allow users who can administer files to check images for nudity in teh file management UI at admin/content/file. https://algorithmia.com/algorithms/sfw/NudityDetection version  0.1.69'),
+  );
+
   return system_settings_form($form);
 }
 
@@ -33,15 +49,26 @@ function algorithmia_admin_settings_form_validate($form, &$form_state) {
   if ($response->code != '200') {
     drupal_set_message('Your API key is invalid. Please provide an API key, or the module will not operate.');
   }
+
+  // Nudity detection is enabled / disabled via admin UI.
+  if ($form_state['values']['nudity'] == 1) {
+    variable_set('algorithmia_nudity', TRUE);
+  }
+  elseif ($form_state['values']['nudity'] != 1) {
+    variable_set('algorithmia_nudity', FALSE);
+  }
+
 }
 
 /**
  * We validate the API key by posting to a simple algorithm.
+ * Algorithmia validates API key on every algorithm request. We use this to validate our form.
  */
 function _algorithmia_validate_api_key($key) {
   $url = 'https://api.algorithmia.com/v1/algo/nlp/SentimentAnalysis/0.1.1';
   $options = array(
     'method' => 'POST',
+    // Dummy data.
     'data' => '"HAPPY GOOD YES"',
     'timeout' => 30,
     'headers' => array(

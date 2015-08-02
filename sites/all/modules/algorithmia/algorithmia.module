@@ -51,13 +51,16 @@ function algorithmia_menu() {
  * Display as a checkbox item in the admin view of files.
 */
 function algorithmia_file_operations() {
-  $operations = array(
-    'nudity' => array(
-      'label' => t('Scan for Nudity'),
-      'callback' => 'algorithmia_validate_nudity',
-    ),
-  );
-  return $operations;
+  $enabled = variable_get('algorithmia_nudity');
+  if ($enabled) {
+    $operations = array(
+      'nudity' => array(
+        'label' => t('Scan for Nudity'),
+        'callback' => 'algorithmia_validate_nudity',
+      ),
+    );
+    return $operations;
+  }
 }
 
 /**
