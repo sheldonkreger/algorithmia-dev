@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Algorithmia primary module file.
+ */
+
+/**
  * Implements hook_block_info().
  */
 function algorithmia_block_info() {
@@ -14,6 +19,9 @@ function algorithmia_block_info() {
   return $blocks;
 }
 
+/**
+ * Implements hook_block_view().
+ */
 function algorithmia_block_view($delta = '') {
   // This example comes from node.module.
   if ($delta == 'algorithmia_recommender') {
@@ -23,11 +31,17 @@ function algorithmia_block_view($delta = '') {
   return $block;
 }
 
+/**
+ * Returns HTML and JavaScript for recommendation block.
+ *
+ * JavaScript file is provided by Algorithmia.
+ */
 function _algorithmia_get_html() {
   $api_key = variable_get('algorithmia_api_key');
   return '<div class="algorithmia-recommends"></div>
     <script src="//algorithmia.com/assets/javascripts/algorithmia-recommends.js"
-    data-apikey="' . $api_key . '" data-uuid="731509d0bcfa45c6b14b5927145d341e"></script>';
+    data-apikey="' . $api_key . 
+    '" data-uuid="731509d0bcfa45c6b14b5927145d341e"></script>';
 }
 
 /**
@@ -48,8 +62,9 @@ function algorithmia_menu() {
 }
 /**
  * Implements hook_file_operations().
+ *
  * Display as a checkbox item in the admin view of files.
-*/
+ */
 function algorithmia_file_operations() {
   $enabled = variable_get('algorithmia_nudity');
   if ($enabled) {
@@ -64,17 +79,17 @@ function algorithmia_file_operations() {
 }
 
 /**
- * Callback for algorithmia_file_operations()
- * @Param $files: Array of files selected by the user to be checked for nudity.
+ * Callback for algorithmia_file_operations().
  *
-*/
+ * @Param $files: Array of files selected by the user to be checked for nudity.
+ */
 function algorithmia_validate_nudity($files) {
   foreach ($files as $file) {
     $file = file_load($file);
     if ($file->type == 'image') {
       $path = file_create_url($file->uri);
       $path = strval($path);
-      $path = '"'.trim($path,'"').'"';
+      $path = '"' . trim($path,'"').'"';
       $url = 'https://api.algorithmia.com/v1/algo/sfw/NudityDetection/0.1.63';
       $key = variable_get('algorithmia_api_key');
       $options = array(
@@ -86,22 +101,22 @@ function algorithmia_validate_nudity($files) {
           'Authorization' => 'Simple ' . $key,
         ),
       );
-      if($response = drupal_http_request($url, $options)) {
-        //return $response;
+      if ($response = drupal_http_request($url, $options)) {
         $json = json_decode($response->data);
 
         if (property_exists($json, 'error')) {
-          watchdog('algorithmia', 'Return error from Algorithmia. JSON: ' . print_r($json, true));
-          drupal_set_message(t( 'Error in Algorithmia API. Link to image may be invalid.'));
+          watchdog('algorithmia', 'Return error from Algorithmia. JSON: ' . print_r($json, TRUE));
+          drupal_set_message(t('Error in Algorithmia API. Link to image may be invalid.'));
           continue;
         }
 
         // Return value will contain 'Not' if the image is not a nude.
-        if (strpos($json->result,'Not') !== false) {
+        if (strpos($json->result, 'Not') !== FALSE) {
           continue;
         }
         else {
-          drupal_set_message(t('File may contain nudity: ' . print_r($path, true)), 'warning');                                                                }
+          $warning = t('File may contain nudity:');
+          drupal_set_message($warning . ' ' . print_r($path, TRUE)), 'warning');                                                                }
       }
     }
   }
