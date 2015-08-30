@@ -116,7 +116,8 @@ function algorithmia_validate_nudity($files) {
         }
         else {
           $warning = t('File may contain nudity:');
-          drupal_set_message($warning . ' ' . print_r($path, TRUE)), 'warning');                                                                }
+          drupal_set_message(t('File may contain nudity: @path image.', array('@path' => $path)), 'warning');
+        }
       }
     }
   }
