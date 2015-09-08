@@ -3,4 +3,3 @@ description = Integrates Drupal with services from Algorithmia.
 core = 7.x
 package = Algorithmia
 configure = admin/config/system/algorithmia
-

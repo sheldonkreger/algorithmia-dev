@@ -23,7 +23,6 @@ function algorithmia_block_info() {
  * Implements hook_block_view().
  */
 function algorithmia_block_view($delta = '') {
-  // This example comes from node.module.
   if ($delta == 'algorithmia_recommender') {
     $block['subject'] = 'Recommended Content';
     $block['content'] = _algorithmia_get_html();
@@ -40,8 +39,8 @@ function _algorithmia_get_html() {
   $api_key = variable_get('algorithmia_api_key');
   return '<div class="algorithmia-recommends"></div>
     <script src="//algorithmia.com/assets/javascripts/algorithmia-recommends.js"
-    data-apikey="' . $api_key . 
-    '" data-uuid="731509d0bcfa45c6b14b5927145d341e"></script>';
+    data-apikey="' . $api_key . '" data-uuid=
+    "731509d0bcfa45c6b14b5927145d341e"></script>';
 }
 
 /**
@@ -60,6 +59,19 @@ function algorithmia_menu() {
 
   return $items;
 }
+
+/**
+ * Implements hook_permission().
+ */
+function algorithmia_permission() {
+  return array(
+    'administer algorithmia' => array(
+      'title' => t('administer algorithmia'),
+      'description' => t('Configure Algorithmia API integration.'),
+    ),
+  );
+}
+
 /**
  * Implements hook_file_operations().
  *
@@ -89,7 +101,7 @@ function algorithmia_validate_nudity($files) {
     if ($file->type == 'image') {
       $path = file_create_url($file->uri);
       $path = strval($path);
-      $path = '"' . trim($path,'"').'"';
+      $path = '"' . trim($path, '"') . '"';
       $url = 'https://api.algorithmia.com/v1/algo/sfw/NudityDetection/0.1.63';
       $key = variable_get('algorithmia_api_key');
       $options = array(
@@ -115,11 +127,9 @@ function algorithmia_validate_nudity($files) {
           continue;
         }
         else {
-          $warning = t('File may contain nudity:');
           drupal_set_message(t('File may contain nudity: @path image.', array('@path' => $path)), 'warning');
         }
       }
     }
   }
 }
-

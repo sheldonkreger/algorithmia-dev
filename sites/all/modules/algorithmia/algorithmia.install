@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Install, update and uninstall functions for the file_entity module.
+ * Install, update and uninstall functions for the Algorithmia module.
  */
 
 /**
@@ -12,4 +12,3 @@ function algorithmia_uninstall() {
   variable_del('algorithmia_api_key');
   variable_del('algorithmia_nudity');
 }
-

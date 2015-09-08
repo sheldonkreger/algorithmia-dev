@@ -67,10 +67,10 @@ function algorithmia_admin_settings_form_validate($form, &$form_state) {
 
 /**
  * We validate the API key by posting to a simple algorithm.
- * 
+ *
  * @Param $key: Algorithmia API key.
  *
- * Algorithmia validates API key on every algorithm request. We use this to validate our form.
+ * Algorithmia validates API key on every algorithm request.
  */
 function _algorithmia_validate_api_key($key) {
   $url = 'https://api.algorithmia.com/v1/algo/nlp/SentimentAnalysis/0.1.1';
@@ -87,4 +87,3 @@ function _algorithmia_validate_api_key($key) {
   $response = drupal_http_request($url, $options);
   return $response;
 }
-
