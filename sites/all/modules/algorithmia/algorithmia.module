@@ -12,7 +12,7 @@ function algorithmia_block_info() {
   $blocks = array();
   $blocks['algorithmia_recommender'] = array(
     'info' => t('Algorithmia Recommender'),
-    'cache' => DRUPAL_CACHE_PER_PAGE,
+    'cache' => DRUPAL_NO_CACHE,
     'status' => 0,
   );
 
